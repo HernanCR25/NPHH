@@ -7,7 +7,7 @@ import { Shed } from '../model/Shed';
   providedIn: 'root',
 })
 export class ShedService {
-  private baseUrl = 'https://congenial-space-disco-76q7x7rr95whvvw-8085.app.github.dev/NPH/sheds';
+  private baseUrl = 'https://scaling-spoon-g4r77vjxgqqxhw566-8084.app.github.dev/NPH/sheds';
 
   constructor(private http: HttpClient) {}
 

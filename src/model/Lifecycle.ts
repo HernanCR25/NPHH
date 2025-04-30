@@ -7,4 +7,5 @@ export interface CicloVida {
     times: number;
     endDate?: Date; 
     status: string;
+    timesInWeeks: string;
   }

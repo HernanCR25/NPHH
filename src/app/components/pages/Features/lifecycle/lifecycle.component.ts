@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CicloVida } from './../../../../../model/Lifecycle';
 import { CicloVidaService } from '../../../../../service/lifecycle.service';
 import { HenService } from './../../../../../service/hen.service';
+import { Vaccine } from './../../../../../model/Vaccine';
 
 @Component({
   selector: 'app-lifecycle',
@@ -23,11 +24,12 @@ export class LifecycleComponent implements OnInit {
   totalPages: number = 0;
   statusFilter: 'A' | 'I' = 'A';
   statusActive: boolean = true;
-  nuevoCiclo: CicloVida = { henId: 0, typeIto: '', nameIto: '', typeTime: '', times: 0, status: 'A' }; // El id y endDate se generan en el backend
+  nuevoCiclo: CicloVida = { henId: 0, typeIto: '', nameIto: '', typeTime: '', timesInWeeks: '', times: 0, status: 'A' }; // El id y endDate se generan en el backend
   mostrarModalCrear: boolean = false;
   mostrarModalEdicion: boolean = false;
   tipoBusqueda: string = '';
   hens: any[] = [];
+  vaccines: Vaccine[] = [];
 
   constructor(
     private cicloVidaService: CicloVidaService,
@@ -50,7 +52,7 @@ export class LifecycleComponent implements OnInit {
 
   cerrarModalCrear(): void {
     this.mostrarModalCrear = false;
-    this.nuevoCiclo = { henId: 0, typeIto: '', nameIto: '', typeTime: '', times: 0, status: 'A' }; // Resetear
+    this.nuevoCiclo = { henId: 0, typeIto: '', nameIto: '', typeTime: '', timesInWeeks: '', times: 0, status: 'A' }; // Resetear
   }
 
   crearCiclo(): void {
@@ -203,4 +205,6 @@ export class LifecycleComponent implements OnInit {
       this.restaurarCiclo(id);
     }
   }
+
+  
 }

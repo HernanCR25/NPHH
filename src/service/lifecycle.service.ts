@@ -8,7 +8,7 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class CicloVidaService {
-  private urlEndPoint: string = 'https://fantastic-enigma-97577wp6qq5ghpjv9-8085.app.github.dev/cicloVida';
+  private urlEndPoint: string = 'https://verbose-space-fishstick-x74wp75494v3v55p-8089.app.github.dev/cicloVida';
 
   constructor(private http: HttpClient) {}
   // Método para obtener ciclos por typeIto (Vacunas, Alimentos, etc.)

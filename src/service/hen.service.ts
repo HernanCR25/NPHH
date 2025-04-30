@@ -8,7 +8,7 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class HenService {
-  private urlEndPoint: string = 'https://opulent-xylophone-wp475pr44xqh9q9v-8085.app.github.dev/hen';
+  private urlEndPoint: string = 'https://fantastic-engine-jvg57vjg975hv7j-8087.app.github.dev/hen';
 
   constructor(private http: HttpClient) {}
 

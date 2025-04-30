@@ -109,15 +109,15 @@ w<header class="bg-white shadow-md py-4">
     <div class="bg-white p-6 rounded-lg shadow-lg w-96">
       <h3 class="text-xl font-bold mb-4">Crear Ciclo</h3>
 
-<!-- 1. Solución para el modal de creación -->
-<label class="block mb-2">Galpón</label>
-<select class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.henId">
-  <option value="" disabled selected>Selecciona un galpón</option>
-  <!-- Modificación clave: verificar que hen.name exista y está definido -->
-  <option *ngFor="let hen of hens" [ngValue]="hen.id">
-    {{ hen.name ? hen.name : 'Galpón ' + hen.id }}
-  </option>
-</select>
+      <!-- 1. modal de creación -->
+      <label class="block mb-2">Galpón</label>
+      <select class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.henId">
+        <option value="" disabled selected>Selecciona un galpón</option>
+        <!-- Modificación clave: verificar que hen.name exista y está definido -->
+        <option *ngFor="let hen of hens" [ngValue]="hen.id">
+          {{ hen.name ? hen.name : 'Galpón ' + hen.id }}
+        </option>
+      </select>
       
       <!-- Campo para Tipo de ITO -->
       <label class="block mb-2">Tipo de HiTO</label>
