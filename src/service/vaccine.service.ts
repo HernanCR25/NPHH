@@ -7,7 +7,7 @@ import { Vaccine } from '../model/Vaccine';
   providedIn: 'root',
 })
 export class VaccineService {
-  private baseUrl = 'https://ominous-space-rotary-phone-4jvwwp5qxgw4f5xg4-8080.app.github.dev';
+  private baseUrl = 'https://8083-vallegrande-vaccine-2xkuz882927.ws-us118.gitpod.io';
     private vaccinesSubject = new BehaviorSubject<Vaccine[]>([]);
     vaccines$ = this.vaccinesSubject.asObservable();
   

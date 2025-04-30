@@ -1,4 +1,4 @@
-w<header class="bg-white shadow-md py-4">
+<header class="bg-white shadow-md py-4">
   <div class="w-full px-4">
     <h1 class="text-3xl font-extrabold text-blue-900 dark:text-blue-400 md:text-4xl">
       <span class="bg-gradient-to-r from-sky-400 to-blue-600 bg-clip-text text-transparent">
@@ -70,14 +70,21 @@ w<header class="bg-white shadow-md py-4">
          
 
       <label class="block mb-2">Tipo de Hito</label>
-      <select class="w-full border p-2 rounded" [(ngModel)]="cicloSeleccionado.typeIto">
+      <select class="w-full border p-2 rounded" [(ngModel)]="cicloSeleccionado.typeIto" (change)="onTipoItoChangeEdicion()">
         <option value="Vacunas">Vacunas</option>
         <option value="Alimentación">Alimentación</option>
       </select>
-
-
+  
       <label class="block mb-2">Nombre del Hito</label>
-      <input type="text" class="w-full border p-2 rounded" [(ngModel)]="cicloSeleccionado.nameIto" placeholder="Selecciona un hito">
+      <!-- Si es vacunas, mostrar dropdown -->
+      <select *ngIf="cicloSeleccionado.typeIto === 'Vacunas'" class="w-full border p-2 rounded" [(ngModel)]="cicloSeleccionado.nameIto">
+        <option *ngFor="let vacuna of vacunas" [value]="vacuna.nameVaccine">
+          {{ vacuna.nameVaccine }}
+        </option>
+      </select>
+  
+      <!-- Si no es vacunas, mostrar input normal -->
+      <input *ngIf="cicloSeleccionado.typeIto !== 'Vacunas'" type="text" class="w-full border p-2 rounded" [(ngModel)]="cicloSeleccionado.nameIto" placeholder="Nombre del hito">
       
 
       <label class="block mb-2">Tipo de tiempo</label>
@@ -119,17 +126,26 @@ w<header class="bg-white shadow-md py-4">
         </option>
       </select>
       
-      <!-- Campo para Tipo de ITO -->
+      <!-- Campo para Tipo de HiTO -->
       <label class="block mb-2">Tipo de HiTO</label>
-      <select class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.typeIto">
+      <select class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.typeIto" (change)="onTipoItoChange()      ">
         <option value="Vacunas">Vacunas</option>
         <option value="Alimentación">Alimentación</option>
       </select>
 
-
-      <!-- Campo para Nombre de ITO -->
+      <!-- Campo para Nombre del HiTO -->
       <label class="block mb-2">Nombre del HiTO</label>
-      <input type="text" class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.nameIto">
+
+      <!-- Si es vacunas, mostrar dropdown -->
+      <select *ngIf="nuevoCiclo.typeIto === 'Vacunas'" class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.nameIto">
+        <option *ngFor="let vacuna of vacunas" [value]="vacuna.nameVaccine">
+          {{ vacuna.nameVaccine }}
+        </option>
+        
+      </select>
+
+      <!-- Si no es vacunas, mostrar input normal -->
+      <input *ngIf="nuevoCiclo.typeIto !== 'Vacunas'" type="text" class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.nameIto">
 
       <!-- Campo para Tipo de Tiempo -->
       <label class="block mb-2">Tipo de Tiempo</label>
@@ -137,7 +153,6 @@ w<header class="bg-white shadow-md py-4">
         <option value="Día">Día</option>
         <option value="Semana">Semana</option>
       </select>
-
 
       <!-- Campo para Tiempo -->
       <label class="block mb-2">Tiempo</label>

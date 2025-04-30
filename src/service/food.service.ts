@@ -10,7 +10,7 @@ import { FoodUpdate } from '../model/food';
 })
 export class FoodService {
 
-    private apiUrl = 'https://msfood-production.up.railway.app/api/foods';
+    private apiUrl = 'https://8080-josegallardop-backendva-rtkkwwzk37v.ws-us118.gitpod.io/api/foods';
 
     constructor(private http: HttpClient) { }
 

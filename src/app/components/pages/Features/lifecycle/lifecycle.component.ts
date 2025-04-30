@@ -5,6 +5,8 @@ import { CicloVida } from './../../../../../model/Lifecycle';
 import { CicloVidaService } from '../../../../../service/lifecycle.service';
 import { HenService } from './../../../../../service/hen.service';
 import { Vaccine } from './../../../../../model/Vaccine';
+import { VaccineService } from './../../../../../service/vaccine.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-lifecycle',
@@ -24,46 +26,82 @@ export class LifecycleComponent implements OnInit {
   totalPages: number = 0;
   statusFilter: 'A' | 'I' = 'A';
   statusActive: boolean = true;
-  nuevoCiclo: CicloVida = { henId: 0, typeIto: '', nameIto: '', typeTime: '', timesInWeeks: '', times: 0, status: 'A' }; // El id y endDate se generan en el backend
+  nuevoCiclo: CicloVida = { henId: 0, typeIto: '', nameIto: '', typeTime: '', timesInWeeks: '', times: 0, status: 'A' };
   mostrarModalCrear: boolean = false;
   mostrarModalEdicion: boolean = false;
   tipoBusqueda: string = '';
   hens: any[] = [];
-  vaccines: Vaccine[] = [];
+  vacunas: Vaccine[] = [];
+
+  private vaccineSub: Subscription | undefined;
 
   constructor(
     private cicloVidaService: CicloVidaService,
-    private henService: HenService // Inyectamos el servicio de Hen
-  ) { }
+    private henService: HenService,
+    private vacunaService: VaccineService
+  ) {}
 
   ngOnInit(): void {
     this.listarCiclos();
-    this.getHens(); // <- Añades esto
+    this.getHens();
   }
+
+  ngOnDestroy(): void {
+    this.vaccineSub?.unsubscribe();
+  }
+
   getHens() {
     this.henService.getHens().subscribe(data => {
       this.hens = data;
-      console.log('Datos de galpones cargados:', this.hens);
     });
   }
+
+  // Método para manejar cambio de tipo de hito en el formulario de creación
+  onTipoItoChange() {
+    if (this.nuevoCiclo.typeIto === 'Vacunas') {
+      this.cargarVacunas();
+    } else {
+      this.vacunas = [];
+    }
+  }
+
+  // Nuevo método para manejar cambio de tipo de hito en el formulario de edición
+  onTipoItoChangeEdicion() {
+    if (this.cicloSeleccionado && this.cicloSeleccionado.typeIto === 'Vacunas') {
+      this.cargarVacunas();
+    } else {
+      this.vacunas = [];
+    }
+  }
+
+  // Método centralizado para cargar vacunas
+  cargarVacunas() {
+    this.vacunaService.getAllVaccines(); // Dispara la carga
+    if (this.vaccineSub) {
+      this.vaccineSub.unsubscribe();
+    }
+    this.vaccineSub = this.vacunaService.vaccines$.subscribe(
+      data => this.vacunas = data.filter(v => v.active === 'A'),  // solo activos
+      error => console.error('Error al recibir vacunas', error)
+    );
+  }
+
   abrirModalCrear(): void {
     this.mostrarModalCrear = true;
   }
 
   cerrarModalCrear(): void {
     this.mostrarModalCrear = false;
-    this.nuevoCiclo = { henId: 0, typeIto: '', nameIto: '', typeTime: '', timesInWeeks: '', times: 0, status: 'A' }; // Resetear
+    this.nuevoCiclo = { henId: 0, typeIto: '', nameIto: '', typeTime: '', timesInWeeks: '', times: 0, status: 'A' };
   }
 
   crearCiclo(): void {
     this.cicloVidaService.create(this.nuevoCiclo).subscribe({
-      next: (data) => {
-        this.listarCiclos(); // Recargar la lista de ciclos
-        this.cerrarModalCrear(); // Cerrar el modal
+      next: () => {
+        this.listarCiclos();
+        this.cerrarModalCrear();
       },
-      error: (err) => {
-        console.error('Error al crear ciclo', err);
-      },
+      error: (err) => console.error('Error al crear ciclo', err),
     });
   }
 
@@ -73,9 +111,7 @@ export class LifecycleComponent implements OnInit {
         this.ciclos = data;
         this.filtrarCiclos();
       },
-      error: (err) => {
-        console.error('Error al listar ciclos', err);
-      },
+      error: (err) => console.error('Error al listar ciclos', err),
     });
   }
 
@@ -114,90 +150,81 @@ export class LifecycleComponent implements OnInit {
 
   eliminarCiclo(id: number): void {
     this.cicloVidaService.delete(id).subscribe({
-      next: () => {
-        window.location.reload();
-      },
-      error: (err) => {
-        console.error('Error al eliminar el ciclo', err);
-      },
+      next: () => window.location.reload(),
+      error: (err) => console.error('Error al eliminar el ciclo', err),
     });
   }
+
   verCiclo(ciclo: any) {
     console.log("Detalles del ciclo:", ciclo);
-    // Aquí puedes abrir un modal o mostrar más detalles según necesites.
   }
-  
+
   restaurarCiclo(id: number): void {
     this.cicloVidaService.activate(id).subscribe({
-      next: () => {
-        window.location.reload();
-      },
-      error: (err) => {
-        console.error('Error al restaurar el ciclo', err);
-      },
+      next: () => window.location.reload(),
+      error: (err) => console.error('Error al restaurar el ciclo', err),
     });
   }
+
   abrirModalDetalle(ciclo: any) {
     this.cicloDetalle = ciclo;
     this.mostrarModalDetalle = true;
-  
+
     if (ciclo.henId) {
       this.henService.getHenById(ciclo.henId).subscribe((hen: any) => {
-        this.cicloDetalle.arrivalDate = hen.arrivalDate; // Agregamos arrivalDate
+        this.cicloDetalle.arrivalDate = hen.arrivalDate;
       });
     }
   }
-  
+
   cerrarModalDetalle() {
     this.mostrarModalDetalle = false;
     this.cicloDetalle = null;
   }
+
   editarCiclo(ciclo: CicloVida): void {
-    this.cicloSeleccionado = { ...ciclo }; // Clonamos el objeto para evitar modificar directamente la lista
-    this.mostrarModal = true; // Abre el modal
+    this.cicloSeleccionado = { ...ciclo };
+    
+    // Cargar vacunas si el tipo seleccionado es "Vacunas"
+    if (this.cicloSeleccionado.typeIto === 'Vacunas') {
+      this.cargarVacunas();
+    }
+    
+    this.mostrarModal = true;
   }
 
   cerrarModal(): void {
     this.mostrarModal = false;
-    this.cicloSeleccionado = null; // Resetea la selección
+    this.cicloSeleccionado = null;
   }
-  
 
   guardarEdicion(): void {
     if (!this.cicloSeleccionado) return;
 
     this.cicloVidaService.update(this.cicloSeleccionado).subscribe({
       next: () => {
-        // Recargar toda la lista de ciclos después de la edición
         this.listarCiclos();
-        this.cerrarModal(); // Cerrar modal después de guardar
+        this.cerrarModal();
       },
-      error: (err) => {
-        console.error('Error al actualizar ciclo', err);
-      }
+      error: (err) => console.error('Error al actualizar ciclo', err)
     });
   }
-  
- // Método para buscar ciclos por tipo (typeIto)
- buscarCicloPorTipo(): void {
-  if (!this.tipoBusqueda) {
-    console.warn('Seleccione un tipo de búsqueda válido.');
-    // Si el campo está vacío, puedes llamar a listarCiclos() o manejar el caso según sea necesario
-    this.listarCiclos();
-    return;
+
+  buscarCicloPorTipo(): void {
+    if (!this.tipoBusqueda) {
+      this.listarCiclos();
+      return;
+    }
+
+    this.cicloVidaService.getCiclosByTypeIto(this.tipoBusqueda).subscribe({
+      next: (data: CicloVida[]) => {
+        this.ciclos = data;
+        this.filtrarCiclos();
+      },
+      error: (err) => console.error('Error al buscar ciclos por tipo', err)
+    });
   }
 
-  // Llamamos al servicio para obtener los ciclos por tipo
-  this.cicloVidaService.getCiclosByTypeIto(this.tipoBusqueda).subscribe({
-    next: (data: CicloVida[]) => {
-      this.ciclos = data; // Asignamos los datos obtenidos
-      this.filtrarCiclos(); // Actualizamos la vista
-    },
-    error: (err) => {
-      console.error('Error al buscar ciclos por tipo', err);
-    }
-  });
-}
   toggleCiclo(id: number, status: 'A' | 'I'): void {
     if (status === 'A') {
       this.eliminarCiclo(id);
@@ -205,6 +232,4 @@ export class LifecycleComponent implements OnInit {
       this.restaurarCiclo(id);
     }
   }
-
-  
 }
