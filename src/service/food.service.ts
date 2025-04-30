@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { Food } from '../model/food';
 import { FoodInsert } from '../model/food';
 import { FoodUpdate } from '../model/food';
+import { BehaviorSubject, catchError, map, Observable, switchMap, tap, throwError } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -11,6 +11,10 @@ import { FoodUpdate } from '../model/food';
 export class FoodService {
 
     private apiUrl = 'https://8080-josegallardop-backendva-rtkkwwzk37v.ws-us118.gitpod.io/api/foods';
+
+    // BehaviorSubject para mantener y compartir los datos de alimentación
+    private foodSubject = new BehaviorSubject<Food[]>([]);
+    public foods$ = this.foodSubject.asObservable();
 
     constructor(private http: HttpClient) { }
 

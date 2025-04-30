@@ -82,9 +82,17 @@
           {{ vacuna.nameVaccine }}
         </option>
       </select>
+      
+      <!-- Si es alimentación, mostrar dropdown -->
+      <select *ngIf="cicloSeleccionado.typeIto === 'Alimentación'" class="w-full border p-2 rounded" [(ngModel)]="cicloSeleccionado.nameIto">
+        <option *ngFor="let alimento of alimentos" [value]="alimento.foodType">
+          {{ alimento.foodType }}
+        </option>
+      </select>
   
-      <!-- Si no es vacunas, mostrar input normal -->
-      <input *ngIf="cicloSeleccionado.typeIto !== 'Vacunas'" type="text" class="w-full border p-2 rounded" [(ngModel)]="cicloSeleccionado.nameIto" placeholder="Nombre del hito">
+      <!-- Si no es vacunas ni alimentación, mostrar input normal -->
+      <input *ngIf="cicloSeleccionado.typeIto !== 'Vacunas' && cicloSeleccionado.typeIto !== 'Alimentación'" 
+             type="text" class="w-full border p-2 rounded" [(ngModel)]="cicloSeleccionado.nameIto" placeholder="Nombre del hito">
       
 
       <label class="block mb-2">Tipo de tiempo</label>
@@ -126,26 +134,33 @@
         </option>
       </select>
       
-      <!-- Campo para Tipo de HiTO -->
-      <label class="block mb-2">Tipo de HiTO</label>
-      <select class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.typeIto" (change)="onTipoItoChange()      ">
-        <option value="Vacunas">Vacunas</option>
-        <option value="Alimentación">Alimentación</option>
-      </select>
+   <!-- Campo para Tipo de HiTO -->
+   <label class="block mb-2">Tipo de HiTO</label>
+   <select class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.typeIto" (change)="onTipoItoChange()">
+     <option value="Vacunas">Vacunas</option>
+     <option value="Alimentación">Alimentación</option>
+   </select>
 
-      <!-- Campo para Nombre del HiTO -->
-      <label class="block mb-2">Nombre del HiTO</label>
+   <!-- Campo para Nombre del HiTO -->
+   <label class="block mb-2">Nombre del HiTO</label>
 
-      <!-- Si es vacunas, mostrar dropdown -->
-      <select *ngIf="nuevoCiclo.typeIto === 'Vacunas'" class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.nameIto">
-        <option *ngFor="let vacuna of vacunas" [value]="vacuna.nameVaccine">
-          {{ vacuna.nameVaccine }}
-        </option>
-        
-      </select>
+   <!-- Si es vacunas, mostrar dropdown de vacunas -->
+   <select *ngIf="nuevoCiclo.typeIto === 'Vacunas'" class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.nameIto">
+     <option *ngFor="let vacuna of vacunas" [value]="vacuna.nameVaccine">
+       {{ vacuna.nameVaccine }}
+     </option>
+   </select>
 
-      <!-- Si no es vacunas, mostrar input normal -->
-      <input *ngIf="nuevoCiclo.typeIto !== 'Vacunas'" type="text" class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.nameIto">
+   <!-- Si es alimentación, mostrar dropdown de alimentos -->
+   <select *ngIf="nuevoCiclo.typeIto === 'Alimentación'" class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.nameIto">
+     <option *ngFor="let alimento of alimentos" [value]="alimento.foodType">
+       {{ alimento.foodType }}
+     </option>
+   </select>
+
+   <!-- Si no es vacunas ni alimentación, mostrar input normal -->
+   <input *ngIf="nuevoCiclo.typeIto !== 'Vacunas' && nuevoCiclo.typeIto !== 'Alimentación'" 
+          type="text" class="w-full border p-2 rounded" [(ngModel)]="nuevoCiclo.nameIto">
 
       <!-- Campo para Tipo de Tiempo -->
       <label class="block mb-2">Tipo de Tiempo</label>

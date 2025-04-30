@@ -6,6 +6,8 @@ import { CicloVidaService } from '../../../../../service/lifecycle.service';
 import { HenService } from './../../../../../service/hen.service';
 import { Vaccine } from './../../../../../model/Vaccine';
 import { VaccineService } from './../../../../../service/vaccine.service';
+import { FoodService } from './../../../../../service/food.service';
+import { Food } from './../../../../../model/food';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -32,13 +34,16 @@ export class LifecycleComponent implements OnInit {
   tipoBusqueda: string = '';
   hens: any[] = [];
   vacunas: Vaccine[] = [];
+  alimentos: Food[] = [];
 
   private vaccineSub: Subscription | undefined;
+  private foodSub: Subscription | undefined;
 
   constructor(
     private cicloVidaService: CicloVidaService,
     private henService: HenService,
-    private vacunaService: VaccineService
+    private vacunaService: VaccineService,
+    private foodService: FoodService
   ) {}
 
   ngOnInit(): void {
@@ -48,6 +53,7 @@ export class LifecycleComponent implements OnInit {
 
   ngOnDestroy(): void {
     this.vaccineSub?.unsubscribe();
+    this.foodSub?.unsubscribe();
   }
 
   getHens() {
@@ -60,17 +66,27 @@ export class LifecycleComponent implements OnInit {
   onTipoItoChange() {
     if (this.nuevoCiclo.typeIto === 'Vacunas') {
       this.cargarVacunas();
+      this.alimentos = []; // Limpiar alimentos si cambia a vacunas
+    } else if (this.nuevoCiclo.typeIto === 'Alimentación') {
+      this.cargarAlimentos();
+      this.vacunas = []; // Limpiar vacunas si cambia a alimentación
     } else {
       this.vacunas = [];
+      this.alimentos = [];
     }
   }
 
-  // Nuevo método para manejar cambio de tipo de hito en el formulario de edición
+  // Método para manejar cambio de tipo de hito en el formulario de edición
   onTipoItoChangeEdicion() {
     if (this.cicloSeleccionado && this.cicloSeleccionado.typeIto === 'Vacunas') {
       this.cargarVacunas();
+      this.alimentos = []; // Limpiar alimentos si cambia a vacunas
+    } else if (this.cicloSeleccionado && this.cicloSeleccionado.typeIto === 'Alimentación') {
+      this.cargarAlimentos();
+      this.vacunas = []; // Limpiar vacunas si cambia a alimentación
     } else {
       this.vacunas = [];
+      this.alimentos = [];
     }
   }
 
@@ -86,8 +102,24 @@ export class LifecycleComponent implements OnInit {
     );
   }
 
+  // Método mejorado para cargar alimentos
+  cargarAlimentos() {
+    if (this.foodSub) {
+      this.foodSub.unsubscribe();
+    }
+    this.foodSub = this.foodService.getActiveFoods().subscribe(
+      data => {
+        this.alimentos = data;
+        console.log('Alimentos cargados:', this.alimentos);
+      },
+      error => console.error('Error al recibir alimentos', error)
+    );
+  }
+
   abrirModalCrear(): void {
     this.mostrarModalCrear = true;
+    // Pre-cargar los dropdowns de opciones
+    this.onTipoItoChange();
   }
 
   cerrarModalCrear(): void {
@@ -185,9 +217,11 @@ export class LifecycleComponent implements OnInit {
   editarCiclo(ciclo: CicloVida): void {
     this.cicloSeleccionado = { ...ciclo };
     
-    // Cargar vacunas si el tipo seleccionado es "Vacunas"
+    // Cargar las opciones correspondientes según el tipo seleccionado
     if (this.cicloSeleccionado.typeIto === 'Vacunas') {
       this.cargarVacunas();
+    } else if (this.cicloSeleccionado.typeIto === 'Alimentación') {
+      this.cargarAlimentos();
     }
     
     this.mostrarModal = true;
