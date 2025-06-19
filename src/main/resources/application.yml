@@ -1,0 +1,11 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: Hen
+
+  r2dbc:
+    url: r2dbc:postgresql://aws-0-us-west-1.pooler.supabase.com:5432/postgres
+    username: postgres.sbfmnpmanzyppnbvgbjn
+    password: vallegrande2024@
