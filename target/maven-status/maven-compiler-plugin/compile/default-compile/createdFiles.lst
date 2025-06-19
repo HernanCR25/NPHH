@@ -1,12 +1,15 @@
 pe/edu/vallegrande/model/CicloModel.class
 pe/edu/vallegrande/config/CorsConfig.class
 pe/edu/vallegrande/CicloVidaApplication.class
+edu/pe/vallegrande/config/AuthContextWebFilter.class
+pe/edu/vallegrande/config/CustomAuthenticationToken.class
 pe/edu/vallegrande/service/CicloService.class
-pe/edu/vallegrande/rest/CicloRest.class
 pe/edu/vallegrande/dto/FoodDTO.class
 pe/edu/vallegrande/CicloVidaApplication$Myconfiguration$1.class
 pe/edu/vallegrande/CicloVidaApplication$Myconfiguration.class
 pe/edu/vallegrande/dto/HenDTO.class
+pe/edu/vallegrande/controller/CicloController.class
 pe/edu/vallegrande/repository/CicloRepository.class
 pe/edu/vallegrande/dto/VaccineDTO.class
+pe/edu/vallegrande/config/SecurityConfig.class
 pe/edu/vallegrande/config/CorsConfig$1.class

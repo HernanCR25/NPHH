@@ -1,11 +1,19 @@
 server:
-  port: 8089
+  port: ${PORT:8089}
 
 spring:
   application:
-    name: Ciclo-Vida
+    name: ${SPRING_APP_NAME:Ciclo-vida}
 
   r2dbc:
-    url: r2dbc:pool:postgresql://aws-0-us-west-1.pooler.supabase.com:5432/postgres
-    username: postgres.rwjixaghztcpqspihqvq
-    password: vallegrande2024@
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    
+# Propiedades personalizadas
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI}
+          jwk-set-uri: ${JWT_JWK_SET_URI}
