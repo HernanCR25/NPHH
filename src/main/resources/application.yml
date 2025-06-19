@@ -3,9 +3,17 @@ server:
 
 spring:
   application:
-    name: Hen
+    name: ${SPRING_APP_NAME:Hen}
 
   r2dbc:
-    url: r2dbc:postgresql://aws-0-us-west-1.pooler.supabase.com:5432/postgres
-    username: postgres.sbfmnpmanzyppnbvgbjn
-    password: vallegrande2024@
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    
+# Propiedades personalizadas
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI}
+          jwk-set-uri: ${JWT_JWK_SET_URI}

@@ -9,3 +9,11 @@ spring:
     url: r2dbc:postgresql://aws-0-us-west-1.pooler.supabase.com:5432/postgres
     username: postgres.sbfmnpmanzyppnbvgbjn
     password: vallegrande2024@
+    
+# Propiedades personalizadas - DEBEN estar en el nivel raíz
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://securetoken.google.com/prs2-83d22
+          jwk-set-uri: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
