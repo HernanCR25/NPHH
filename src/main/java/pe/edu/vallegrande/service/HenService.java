@@ -54,6 +54,7 @@ public class HenService {
     public Mono<HenModel> updateHen(Long id, HenModel hen) {
         return henRepository.findById(id)
                 .flatMap(existingHen -> {
+                    existingHen.setHenType(hen.getHenType());
                     existingHen.setArrivalDate(hen.getArrivalDate()); // Manejo de LocalDate
                     existingHen.setQuantity(hen.getQuantity());
                     existingHen.setStatus(hen.getStatus());
