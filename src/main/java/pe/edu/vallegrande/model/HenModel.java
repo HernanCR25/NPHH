@@ -16,7 +16,10 @@ public class HenModel {
 
     @Id
     private Long id;
-
+    
+    @Column("hen_type")
+    private String henType;
+    
     @Column("arrival_date")
     private LocalDate arrivalDate;
 
