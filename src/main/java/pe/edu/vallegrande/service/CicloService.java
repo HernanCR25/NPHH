@@ -1,16 +1,16 @@
 package pe.edu.vallegrande.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import pe.edu.vallegrande.dto.FoodDTO;
+import pe.edu.vallegrande.dto.HenDTO;
+import pe.edu.vallegrande.dto.VaccineDTO;
 import pe.edu.vallegrande.model.CicloModel;
 import pe.edu.vallegrande.repository.CicloRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import org.springframework.web.reactive.function.client.WebClient;
-import pe.edu.vallegrande.dto.VaccineDTO;
-import pe.edu.vallegrande.dto.HenDTO;
-import pe.edu.vallegrande.dto.FoodDTO;
-import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 
@@ -20,13 +20,16 @@ public class CicloService {
     private final CicloRepository cicloRepository;
 
     @Autowired
+    private WebClient.Builder webClientBuilder;
+
+    @Autowired
     public CicloService(CicloRepository cicloRepository) {
         this.cicloRepository = cicloRepository;
     }
 
-    // Obtener todos los ciclos mendiante la vista
+    // Obtener todos los ciclos mediante la vista
     public Flux<CicloModel> getAllCycleLifeData() {
-        return cicloRepository.findAllFromVista(); // Usar la vista
+        return cicloRepository.findAllFromVista();
     }
 
     // Obtener todos los ciclos
@@ -54,13 +57,9 @@ public class CicloService {
         return cicloRepository.findByStatus("I");
     }
 
-    // Crear un nuevo ciclo
-    //public Mono<CicloModel> createCiclo(CicloModel ciclo) {
-      //  return cicloRepository.save(ciclo);
-    //}
-    // Método para guardar un ciclo y calcular el endDate
+    // Crear un nuevo ciclo con cálculo de endDate
     public Mono<CicloModel> createCiclo(CicloModel ciclo) {
-        return getHenFromExternal(ciclo.getHenId())  // Obtener la gallina desde el microservicio
+        return getHenFromExternal(ciclo.getHenId())
             .flatMap(henDTO -> {
                 LocalDate arrivalDate = henDTO.getArrivalDate();
 
@@ -68,7 +67,6 @@ public class CicloService {
                     return Mono.error(new RuntimeException("arrivalDate is null for henId: " + ciclo.getHenId()));
                 }
 
-                // Calcular el endDate según el tipo de tiempo y el número de veces
                 switch (ciclo.getTypeTime()) {
                     case "Día":
                         ciclo.setEndDate(arrivalDate.plusDays(ciclo.getTimes()));
@@ -80,15 +78,13 @@ public class CicloService {
                         return Mono.error(new RuntimeException("Tipo de tiempo no válido: " + ciclo.getTypeTime()));
                 }
 
-                // Guardar el ciclo de vida
                 return cicloRepository.save(ciclo);
             });
     }
 
     // Actualizar un ciclo existente
-    // Método para actualizar un ciclo y recalcular el endDate si es necesario
     public Mono<CicloModel> updateCiclo(Long id, CicloModel ciclo) {
-        return getHenFromExternal(ciclo.getHenId())  // Obtener la gallina desde el microservicio
+        return getHenFromExternal(ciclo.getHenId())
             .flatMap(henDTO -> {
                 LocalDate arrivalDate = henDTO.getArrivalDate();
 
@@ -96,7 +92,6 @@ public class CicloService {
                     return Mono.error(new RuntimeException("arrivalDate is null for henId: " + ciclo.getHenId()));
                 }
 
-                // Recalcular el endDate según el tipo de tiempo y el número de veces
                 switch (ciclo.getTypeTime()) {
                     case "Día":
                         ciclo.setEndDate(arrivalDate.plusDays(ciclo.getTimes()));
@@ -108,27 +103,25 @@ public class CicloService {
                         return Mono.error(new RuntimeException("Tipo de tiempo no válido: " + ciclo.getTypeTime()));
                 }
 
-                // Actualizar el ciclo de vida con el nuevo endDate
                 return cicloRepository.save(ciclo);
             });
     }
 
-
-    // Eliminar un ciclo físicamente por ID
+    // Eliminar un ciclo físicamente
     public Mono<Void> deleteCiclo(Long id) {
         return cicloRepository.deleteById(id);
     }
 
-    // Inactivar un ciclo por ID (eliminación lógica)
+    // Inactivar un ciclo (eliminación lógica)
     public Mono<CicloModel> deactivateCiclo(Long id) {
-        return cicloRepository.findById(id) // Buscar el ciclo por ID
+        return cicloRepository.findById(id)
                 .flatMap(ciclo -> {
-                    ciclo.setStatus("I"); // Cambiar estado a inactivo
-                    return cicloRepository.save(ciclo); // Guardar cambios
+                    ciclo.setStatus("I");
+                    return cicloRepository.save(ciclo);
                 });
     }
 
-    // Activar un ciclo por ID
+    // Activar un ciclo
     public Mono<CicloModel> activateCiclo(Long id) {
         return cicloRepository.findById(id)
                 .flatMap(ciclo -> {
@@ -137,47 +130,58 @@ public class CicloService {
                 });
     }
 
-    // WebClient para consumir datos de Vaccines
-    private final WebClient vaccinesWebClient = WebClient.builder()
-    .baseUrl("https://titulovaccine.onrender.com/vaccines") // Ajusta la URL si cambia
-    .defaultHeader("Content-Type", "application/json")
-    .build();
+    // ==============================
+    // Llamadas externas con JWT
+    // ==============================
 
-    // Método para consumir los datos de Shed desde otro microservicio
     public Mono<VaccineDTO> getVaccinesFromExternal(Long vaccineId) {
-    return vaccinesWebClient.get()
-        .uri("/{id}", vaccineId) // Usa el shedId como parámetro en la URL
-        .accept(MediaType.APPLICATION_JSON)
-        .retrieve()
-        .bodyToMono(VaccineDTO.class);  // Retorna un Mono con el DTO de Shed
+        return Mono.deferContextual(ctxView -> {
+            String token = ctxView.getOrDefault("Authorization", null);
+            if (token == null) {
+                return Mono.error(new RuntimeException("JWT token not found in context"));
+            }
+
+            return webClientBuilder.build()
+                    .get()
+                    .uri("https://titulovaccine.onrender.com/vaccines/{id}", vaccineId)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(VaccineDTO.class);
+        });
     }
 
-    // WebClient para consumir datos de HEN
-    private final WebClient henWebClient = WebClient.builder()
-    .baseUrl("https://nphh.onrender.com/hen") // Ajusta la URL si cambia
-    .defaultHeader("Content-Type", "application/json")
-    .build();
-
-    // Método para consumir los datos de Shed desde otro microservicio
     public Mono<HenDTO> getHenFromExternal(Long henId) {
-    return henWebClient.get()
-        .uri("/{id}", henId) // Usa el shedId como parámetro en la URL
-        .accept(MediaType.APPLICATION_JSON)
-        .retrieve()
-        .bodyToMono(HenDTO.class);  // Retorna un Mono con el DTO de Shed
-    }
-        // WebClient para consumir datos de FOOD
-    private final WebClient foodWebClient = WebClient.builder()
-            .baseUrl("https://msfood.onrender.com/api/foods") // Ajusta la URL si cambia
-            .defaultHeader("Content-Type", "application/json")
-            .build();
+        return Mono.deferContextual(ctxView -> {
+            String token = ctxView.getOrDefault("Authorization", null);
+            if (token == null) {
+                return Mono.error(new RuntimeException("JWT token not found in context"));
+            }
 
-    // Método para consumir los datos de Shed desde otro microservicio
+            return webClientBuilder.build()
+                    .get()
+                    .uri("https://nphh.onrender.com/hen/{id}", henId)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(HenDTO.class);
+        });
+    }
+
     public Mono<FoodDTO> getFoodFromExternal(Long idFood) {
-        return foodWebClient.get()
-                .uri("/{id}", idFood) // Usa el idFood como parámetro en la URL
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(FoodDTO.class);  // Retorna un Mono con el DTO de Shed
+        return Mono.deferContextual(ctxView -> {
+            String token = ctxView.getOrDefault("Authorization", null);
+            if (token == null) {
+                return Mono.error(new RuntimeException("JWT token not found in context"));
+            }
+
+            return webClientBuilder.build()
+                    .get()
+                    .uri("https://msfood.onrender.com/api/foods/{id}", idFood)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(FoodDTO.class);
+        });
     }
 }
