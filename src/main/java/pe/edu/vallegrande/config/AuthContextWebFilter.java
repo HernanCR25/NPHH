@@ -1,4 +1,4 @@
-package edu.pe.vallegrande.config;
+package pe.edu.vallegrande.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
