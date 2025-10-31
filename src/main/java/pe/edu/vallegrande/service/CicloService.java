@@ -139,7 +139,7 @@ public class CicloService {
 
     // WebClient para consumir datos de Vaccines
     private final WebClient vaccinesWebClient = WebClient.builder()
-    .baseUrl("https://vacunasss.onrender.com/vaccines") // Ajusta la URL si cambia
+    .baseUrl("https://titulovaccine.onrender.com/vaccines") // Ajusta la URL si cambia
     .defaultHeader("Content-Type", "application/json")
     .build();
 
@@ -154,7 +154,7 @@ public class CicloService {
 
     // WebClient para consumir datos de HEN
     private final WebClient henWebClient = WebClient.builder()
-    .baseUrl("https://nph-p4a8.onrender.com/hen") // Ajusta la URL si cambia
+    .baseUrl("https://nphh.onrender.com/hen") // Ajusta la URL si cambia
     .defaultHeader("Content-Type", "application/json")
     .build();
 
@@ -168,7 +168,7 @@ public class CicloService {
     }
         // WebClient para consumir datos de FOOD
     private final WebClient foodWebClient = WebClient.builder()
-            .baseUrl("https://ms-foods.onrender.com/api/foods") // Ajusta la URL si cambia
+            .baseUrl("https://msfood.onrender.com/api/foods") // Ajusta la URL si cambia
             .defaultHeader("Content-Type", "application/json")
             .build();
 
